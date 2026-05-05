@@ -19,5 +19,6 @@ export default defineConfig({
   preview: {
     port: parseInt(process.env.PORT) || 4173,
     host: true,
+    allowedHosts: ['tender-elegance-production.up.railway.app'],
   },
 });
