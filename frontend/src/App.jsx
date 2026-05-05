@@ -74,10 +74,12 @@ export default function App() {
 
   useEffect(() => {
     async function fetchState() {
+      const url = `${API}/api/state`;
       try {
-        const res = await fetch(`${API}/api/state`);
+        console.log('[fetchState] calling', url);
+        const res = await fetch(url);
         const data = await res.json();
-        console.log('[/api/state response]', {
+        console.log('[fetchState] response', {
           portfolio: data.portfolio,
           pnl: data.pnl,
           openPositions: data.openPositions?.length,
@@ -85,7 +87,7 @@ export default function App() {
         });
         applyState(data);
       } catch (e) {
-        console.error('Failed to fetch state:', e.message);
+        console.error('[fetchState] failed for', url, e.message);
       }
     }
     fetchState();

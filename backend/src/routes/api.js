@@ -2,15 +2,21 @@ const express = require('express');
 const router = express.Router();
 const bot = require('../services/bot');
 
-router.get('/state', (req, res) => {
-  const s = bot.getState();
-  console.log('[GET /api/state]', {
-    portfolio: s.portfolio,
-    pnl: s.pnl,
-    openPositions: s.openPositions?.length,
-    trades: s.trades?.length,
-  });
-  res.json(s);
+router.get('/state', async (req, res) => {
+  try {
+    await bot.loadStateFromDB();
+    const s = bot.getState();
+    console.log('[GET /api/state] DB queried:', {
+      portfolio: s.portfolio,
+      pnl: s.pnl,
+      openPositions: s.openPositions?.length,
+      trades: s.trades?.length,
+    });
+    res.json(s);
+  } catch (e) {
+    console.error('[GET /api/state] DB error:', e.message);
+    res.json(bot.getState());
+  }
 });
 
 router.post('/analyse', async (req, res) => {

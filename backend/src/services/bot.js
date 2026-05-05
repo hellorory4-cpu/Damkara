@@ -305,13 +305,17 @@ async function updateSettings(newSettings) {
 }
 
 async function startBotLoop() {
-  await loadStateFromDB();
-  console.log('Bot state loaded from DB:', {
-    portfolio: state.portfolio,
-    pnl: state.pnl,
-    openPositions: state.openPositions.length,
-    closedTrades: state.trades.length,
-  });
+  try {
+    await loadStateFromDB();
+    console.log('Bot state loaded from DB:', {
+      portfolio: state.portfolio,
+      pnl: state.pnl,
+      openPositions: state.openPositions.length,
+      closedTrades: state.trades.length,
+    });
+  } catch (e) {
+    console.error('Failed to load state from DB — starting with defaults:', e.message);
+  }
   setTimeout(() => {
     if (state.botActive) runAnalysisAndTrade();
   }, 3000);
@@ -321,4 +325,4 @@ async function startBotLoop() {
   }, 60_000);
 }
 
-module.exports = { startBotLoop, getState, toggleBot, resetBot, updateSettings, runAnalysisAndTrade };
+module.exports = { startBotLoop, loadStateFromDB, getState, toggleBot, resetBot, updateSettings, runAnalysisAndTrade };
