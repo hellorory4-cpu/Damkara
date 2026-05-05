@@ -3,7 +3,14 @@ const router = express.Router();
 const bot = require('../services/bot');
 
 router.get('/state', (req, res) => {
-  res.json(bot.getState());
+  const s = bot.getState();
+  console.log('[GET /api/state]', {
+    portfolio: s.portfolio,
+    pnl: s.pnl,
+    openPositions: s.openPositions?.length,
+    trades: s.trades?.length,
+  });
+  res.json(s);
 });
 
 router.post('/analyse', async (req, res) => {

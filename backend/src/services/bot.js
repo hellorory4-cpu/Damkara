@@ -304,19 +304,21 @@ async function updateSettings(newSettings) {
   if (global.broadcast) global.broadcast('settings_update', state.settings);
 }
 
-function startBotLoop() {
-  loadStateFromDB()
-    .then(() => {
-      console.log('Bot state loaded from DB');
-      setTimeout(() => {
-        if (state.botActive) runAnalysisAndTrade();
-      }, 3000);
-      setInterval(checkPositions, 15_000);
-      setInterval(() => {
-        if (state.botActive) runAnalysisAndTrade();
-      }, 60_000);
-    })
-    .catch(e => console.error('Failed to load bot state:', e.message));
+async function startBotLoop() {
+  await loadStateFromDB();
+  console.log('Bot state loaded from DB:', {
+    portfolio: state.portfolio,
+    pnl: state.pnl,
+    openPositions: state.openPositions.length,
+    closedTrades: state.trades.length,
+  });
+  setTimeout(() => {
+    if (state.botActive) runAnalysisAndTrade();
+  }, 3000);
+  setInterval(checkPositions, 15_000);
+  setInterval(() => {
+    if (state.botActive) runAnalysisAndTrade();
+  }, 60_000);
 }
 
 module.exports = { startBotLoop, getState, toggleBot, resetBot, updateSettings, runAnalysisAndTrade };

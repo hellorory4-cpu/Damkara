@@ -77,6 +77,12 @@ export default function App() {
       try {
         const res = await fetch(`${API}/api/state`);
         const data = await res.json();
+        console.log('[/api/state response]', {
+          portfolio: data.portfolio,
+          pnl: data.pnl,
+          openPositions: data.openPositions?.length,
+          trades: data.trades?.length,
+        });
         applyState(data);
       } catch (e) {
         console.error('Failed to fetch state:', e.message);

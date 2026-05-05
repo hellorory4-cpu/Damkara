@@ -65,7 +65,7 @@ async function start() {
     await initDB();
     startBinanceWS();
     startMarketDataPolling();
-    startBotLoop();
+    await startBotLoop();
 
     server.listen(PORT, () => {
       console.log(`DAMKARA backend running on port ${PORT}`);
