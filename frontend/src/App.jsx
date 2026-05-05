@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useWebSocket } from './hooks/useWebSocket';
 import Header from './components/Header';
 import Ticker from './components/Ticker';
@@ -56,6 +56,10 @@ export default function App() {
   const [lastAnalysisTime, setLastAnalysisTime] = useState(null);
   const [marketData, setMarketData] = useState({ fng: {}, btcDominance: {} });
 
+  // Tracks the last time the HTTP fetch loaded data so the WS state
+  // snapshot (sent on connect) cannot race and overwrite fresher data.
+  const lastHttpFetchRef = useRef(0);
+
   const applyState = useCallback(data => {
     if (!data) return;
     if (data.livePrices) setLivePrices(data.livePrices);
@@ -85,6 +89,7 @@ export default function App() {
           openPositions: data.openPositions?.length,
           trades: data.trades?.length,
         });
+        lastHttpFetchRef.current = Date.now();
         applyState(data);
       } catch (e) {
         console.error('[fetchState] failed for', url, e.message);
@@ -95,11 +100,28 @@ export default function App() {
     return () => clearInterval(id);
   }, [applyState]);
 
+  // WS state snapshot: only apply if it arrived after the last HTTP fetch
+  // (i.e. it has fresher data), otherwise the HTTP poll already won.
+  const handleWsState = useCallback(data => {
+    const age = Date.now() - lastHttpFetchRef.current;
+    console.log('[WS state] received, ms since last HTTP fetch:', age, {
+      portfolio: data?.portfolio,
+      trades: data?.trades?.length,
+      openPositions: data?.openPositions?.length,
+    });
+    // If HTTP already loaded data within the last 10 s, trust it over WS snapshot
+    if (age < 10_000) {
+      console.log('[WS state] skipping — HTTP data is fresher');
+      return;
+    }
+    applyState(data);
+  }, [applyState]);
+
   useWebSocket({
     onConnected: () => setWsConnected(true),
     onDisconnected: () => setWsConnected(false),
 
-    state: applyState,
+    state: handleWsState,
 
     prices_update: data => {
       setLivePrices({ ...data.livePrices });

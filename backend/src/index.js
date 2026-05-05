@@ -6,7 +6,7 @@ const cors = require('cors');
 const { initDB } = require('./db');
 const { startBinanceWS } = require('./services/binance');
 const { startMarketDataPolling } = require('./services/marketData');
-const { startBotLoop, getState } = require('./services/bot');
+const { startBotLoop, loadStateFromDB, getState } = require('./services/bot');
 const { sendTelegram } = require('./services/telegram');
 const apiRoutes = require('./routes/api');
 
@@ -23,15 +23,23 @@ app.use(express.json());
 // Connected WebSocket clients
 const clients = new Set();
 
-wss.on('connection', ws => {
+wss.on('connection', async ws => {
   clients.add(ws);
   console.log(`WS client connected (${clients.size} total)`);
 
-  // Send full state snapshot on connect
+  // Always send fresh state from DB so WS snapshot matches HTTP /api/state
   try {
-    ws.send(JSON.stringify({ type: 'state', data: getState() }));
+    await loadStateFromDB();
+    const snapshot = getState();
+    console.log('[WS state snapshot]', {
+      portfolio: snapshot.portfolio,
+      pnl: snapshot.pnl,
+      openPositions: snapshot.openPositions?.length,
+      trades: snapshot.trades?.length,
+    });
+    ws.send(JSON.stringify({ type: 'state', data: snapshot }));
   } catch (e) {
-    // state may not be fully loaded yet on first connect
+    console.error('WS state send error:', e.message);
   }
 
   ws.on('close', () => {
