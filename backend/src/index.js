@@ -70,7 +70,7 @@ async function start() {
     server.listen(PORT, () => {
       console.log(`DAMKARA backend running on port ${PORT}`);
       sendTelegram(
-        '⚡ <b>DAMKARA SERVER ONLINE</b>\n\nBackend deployed and running.\n\n🤖 Claude AI: Active\n📊 Binance WS: Connected\n🗄️ Database: Ready\n\nThe ancient trader awakens. 🏺',
+        '⚡ <b>DAMKARA SERVER ONLINE</b>\n\nBackend deployed and running.\n\n🤖 Claude AI: Active\n📊 CoinGecko Feed: Active\n🗄️ Database: Ready\n\nThe ancient trader awakens. 🏺',
         true
       );
     });
