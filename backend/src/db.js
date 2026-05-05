@@ -64,7 +64,8 @@ async function initDB() {
     `);
 
     await client.query(`
-      INSERT INTO settings DEFAULT VALUES
+      INSERT INTO settings (id)
+      SELECT 1
       WHERE NOT EXISTS (SELECT 1 FROM settings LIMIT 1);
     `);
 
