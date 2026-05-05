@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useWebSocket } from './hooks/useWebSocket';
 import Header from './components/Header';
 import Ticker from './components/Ticker';
@@ -71,6 +71,21 @@ export default function App() {
     if (data.lastAnalysisTime != null) setLastAnalysisTime(data.lastAnalysisTime);
     if (data.marketData != null) setMarketData(data.marketData);
   }, []);
+
+  useEffect(() => {
+    async function fetchState() {
+      try {
+        const res = await fetch(`${API}/api/state`);
+        const data = await res.json();
+        applyState(data);
+      } catch (e) {
+        console.error('Failed to fetch state:', e.message);
+      }
+    }
+    fetchState();
+    const id = setInterval(fetchState, 5000);
+    return () => clearInterval(id);
+  }, [applyState]);
 
   useWebSocket({
     onConnected: () => setWsConnected(true),
