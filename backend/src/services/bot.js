@@ -91,7 +91,7 @@ async function loadStateFromDB() {
         sentiment_label: row.sentiment_label,
         reasoning: row.reasoning,
         market_regime: row.market_regime,
-        signals: row.signals_data,
+        signals: Array.isArray(row.signals_data) ? row.signals_data : [],
       };
       state.lastAnalysisTime = row.created_at;
     }

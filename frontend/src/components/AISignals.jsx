@@ -40,7 +40,7 @@ export default function AISignals({ signals, aiThinking, livePrices, settings })
       )}
 
       <div style={{ maxHeight: 500, overflowY: 'auto' }}>
-        {!signals ? (
+        {!signals || !Array.isArray(signals.signals) ? (
           <div className="empty-state">Initialising AI analysis...</div>
         ) : (
           signals.signals.map(s => {
